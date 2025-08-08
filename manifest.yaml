@@ -1,0 +1,142 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: radicle
+  labels:
+    app.kubernetes.io/name: radicle
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: default-seeding-policy
+  namespace: radicle
+  labels:
+    app.kubernetes.io/name: radicle
+data:
+  RAD_DEFAULT_SEEDING_POLICY: block
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRouteTCP
+metadata:
+  name: radicle-node
+  namespace: radicle
+spec:
+  entryPoints:
+    - radicle
+  routes:
+    - match: HostSNI(`*`)
+      services:
+        - name: radicle
+          port: radicle-node
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: radicle-httpd
+  namespace: radicle
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`radicle`)
+      services:
+        - name: radicle
+          port: radicle-httpd
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: radicle
+  namespace: radicle
+  labels:
+    app.kubernetes.io/name: radicle
+spec:
+  selector:
+    app.kubernetes.io/name: radicle
+  type: ClusterIP
+  ports:
+    - name: radicle-node
+      port: 8776
+      protocol: TCP
+      targetPort: radicle-node
+    - name: radicle-httpd
+      port: 80
+      protocol: TCP
+      targetPort: radicle-httpd
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: radicle-sts
+  namespace: radicle
+  labels:
+    app.kubernetes.io/name: radicle
+spec:
+  selector:
+    app.kubernetes.io/name: radicle
+  clusterIP: None
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: radicle
+  namespace: radicle
+  labels:
+    app.kubernetes.io/name: radicle
+spec:
+  serviceName: radicle-sts
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: radicle
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: radicle
+    spec:
+      containers:
+        - name: node
+          image: ghcr.io/nausicaea/radicle-node:v0.1.0
+          envFrom:
+            - configMapRef:
+                name: default-seeding-policy
+          resources:
+            requests:
+              cpu: "0.5"
+              memory: "100Mi"
+            limits:
+              cpu: "1"
+              memory: "512Mi"
+          volumeMounts:
+            - name: persistent
+              mountPath: /var/lib/radicle
+          ports:
+            - name: radicle-node
+              containerPort: 8776
+        - name: httpd
+          image: ghcr.io/nausicaea/radicle-httpd:v0.1.0
+          resources:
+            requests:
+              cpu: "0.25"
+              memory: "25Mi"
+            limits:
+              cpu: "1"
+              memory: "512Mi"
+          volumeMounts:
+            - name: persistent
+              mountPath: /var/lib/radicle
+              readOnly: true
+              recursiveReadOnly: Enabled
+          ports:
+            - name: radicle-httpd
+              containerPort: 80
+  volumeClaimTemplates:
+    - metadata:
+        name: persistent
+      spec:
+        storageClassName: longhorn
+        accessModes: [ReadWriteOnce]
+        resources:
+          requests:
+            storage: 10Gi
