@@ -29,12 +29,15 @@ EOF
 
 FROM docker.io/library/alpine:3.22
 ARG RAD_HOME="/var/lib/radicle"
-ARG RAD_PORT="8776"
+ARG RAD_NODE_PORT="8776"
 VOLUME ["$RAD_HOME"]
-EXPOSE "$RAD_PORT/tcp"
+EXPOSE "$RAD_NODE_PORT/tcp"
 ENV RAD_HOME="$RAD_HOME"
+ENV RAD_NODE_PORT="$RAD_NODE_PORT"
 ENV RAD_ALIAS=""
 ENV RAD_PASSPHRASE=""
+ENV RUST_BACKTRACE="1"
+ENV RUST_LOG="info"
 RUN --mount=type=bind,from=builder,source=/artefacts/radicle.tar.xz,target=/tmp/radicle.tar.xz <<-EOF
 set -xe
 addgroup -S -g 10001 radicle
@@ -42,7 +45,6 @@ adduser -S -u 10001 -G radicle -h "$RAD_HOME" -g "Radicle Seed Node" -s /bin/sh 
 apk add --no-cache git uuidgen
 tar -xvJf "/tmp/radicle.tar.xz" --strip-components=1 -C /usr/local/
 EOF
-COPY --link --chmod=0755 docker-entrypoint.sh /usr/local/bin/
+COPY --link --chmod=0755 docker-entrypoint-node.sh /usr/local/bin/docker-entrypoint.sh
 USER 10001:10001
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
-CMD ["node", "start", "--foreground"]

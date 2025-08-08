@@ -12,4 +12,4 @@ if ! rad self --alias 2>&1 > /dev/null; then
     fi
 fi
 
-exec rad "$@"
+exec radicle-node --listen "0.0.0.0:$RAD_NODE_PORT" "$@"

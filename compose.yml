@@ -1,0 +1,24 @@
+name: radicle
+services:
+  node:
+    image: nausicaea/radicle-node:local
+    build:
+      context: .
+      dockerfile: node.Dockerfile
+    volumes:
+      - data:/var/lib/radicle
+    ports:
+      - 127.0.0.1:8778:8778/tcp
+
+  httpd:
+    image: nausicaea/radicle-httpd:local
+    build:
+      context: .
+      dockerfile: httpd.Dockerfile
+    volumes:
+      - data:/var/lib/radicle:ro
+    ports:
+      - 127.0.0.1:8080:80/tcp
+
+volumes:
+  data: {}
