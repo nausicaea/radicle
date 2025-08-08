@@ -3,8 +3,9 @@ services:
   node:
     image: nausicaea/radicle-node:local
     build:
-      context: .
       dockerfile: node.Dockerfile
+    environment:
+      RAD_DEFAULT_SEEDING_POLICY: block
     volumes:
       - data:/var/lib/radicle
     ports:
@@ -13,7 +14,6 @@ services:
   httpd:
     image: nausicaea/radicle-httpd:local
     build:
-      context: .
       dockerfile: httpd.Dockerfile
     volumes:
       - data:/var/lib/radicle:ro
