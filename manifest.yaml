@@ -97,7 +97,7 @@ spec:
     spec:
       containers:
         - name: node
-          image: ghcr.io/nausicaea/radicle-node:v0.1.0
+          image: &radicle_node ghcr.io/nausicaea/radicle-node:v0.1.0
           envFrom:
             - configMapRef:
                 name: default-seeding-policy
@@ -131,6 +131,21 @@ spec:
           ports:
             - name: radicle-httpd
               containerPort: 80
+      initContainers:
+        - name: init
+          image: *radicle_node
+          securityContext:
+            runAsUser: 0
+            runAsGroup: 0
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              set -xe;
+              chown -vR 10001:10001 /tmp/radicle;
+          volumeMounts:
+            - name: persistent
+              mountPath: /tmp/radicle
+
   volumeClaimTemplates:
     - metadata:
         name: persistent
