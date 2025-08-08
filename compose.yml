@@ -9,7 +9,7 @@ services:
     volumes:
       - data:/var/lib/radicle
     ports:
-      - 127.0.0.1:8778:8778/tcp
+      - 127.0.0.1:8778:8776/tcp
 
   httpd:
     image: nausicaea/radicle-httpd:local
