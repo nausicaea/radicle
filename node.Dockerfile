@@ -36,6 +36,7 @@ ENV RAD_HOME="$RAD_HOME"
 ENV RAD_NODE_PORT="$RAD_NODE_PORT"
 ENV RAD_ALIAS=""
 ENV RAD_PASSPHRASE=""
+ENV RAD_DEFAULT_SEEDING_POLICY="block"
 ENV RUST_BACKTRACE="1"
 ENV RUST_LOG="info"
 RUN --mount=type=bind,from=builder,source=/artefacts/radicle.tar.xz,target=/tmp/radicle.tar.xz <<-EOF

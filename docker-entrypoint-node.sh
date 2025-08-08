@@ -12,4 +12,8 @@ if ! rad self --alias 2>&1 > /dev/null; then
     fi
 fi
 
+if [ -n "$RAD_DEFAULT_SEEDING_POLICY" ]; then
+    rad config set node.seedingPolicy.default "$RAD_DEFAULT_SEEDING_POLICY"
+fi
+
 exec radicle-node --listen "0.0.0.0:$RAD_NODE_PORT" "$@"
