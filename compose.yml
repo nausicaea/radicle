@@ -19,6 +19,8 @@ services:
       - data:/var/lib/radicle:ro
     ports:
       - 127.0.0.1:8080:80/tcp
+    depends_on:
+      - node
 
 volumes:
   data: {}
