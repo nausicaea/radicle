@@ -2,7 +2,7 @@
 
 FROM docker.io/library/alpine:3.22 AS builder
 ARG TARGETPLATFORM
-ARG RADICLE_VERSION="1.2.1"
+ARG RADICLE_VERSION="1.4.0"
 ARG RADICLE_SIGNING_IDENTITY="fintan@radicle.xyz"
 
 WORKDIR /artefacts
